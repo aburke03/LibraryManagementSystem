@@ -20,11 +20,6 @@ public class Library {
         allMembers.remove(memberId);
     }
 
-    public boolean bookAvailability(String bookId) {
-        Book book = allBooks.get(bookId);
-        return book != null && book.checkAvailability();
-    }
-
     public String whoHasBook(String bookId) {
         for (Member member : allMembers.values()) {
             for (Book book : member.getBorrowedBookList()) {
@@ -40,6 +35,10 @@ public class Library {
         return allMembers.values();
     }
 
+    public Collection<Book> getAllBooks() {
+        return allBooks.values();
+    }
+
     public Book findBookByName(String name) {
         for (Book book : allBooks.values()) {
             if (book.getName().equalsIgnoreCase(name)) {
@@ -49,25 +48,23 @@ public class Library {
         return null;
     }
 
-    public void checkoutBook(String memberId, String bookId) {
-        Member member = allMembers.get(memberId);
-        Book book = allBooks.get(bookId);
-        if (member != null && book != null && book.checkAvailability()) {
+    public Book getBookById(String bookId) {
+        return allBooks.get(bookId);
+    }
+
+    public Member getMemberById(String memberId) {
+        return allMembers.get(memberId);
+    }
+
+    public void checkoutBook(Member member, Book book) {
+        if (book.isAvailable()) {
             member.addBorrowedBook(book);
             book.setAvailable(false);
         }
     }
 
-    public void returnBook(String memberId, String bookId) {
-        Member member = allMembers.get(memberId);
-        Book book = allBooks.get(bookId);
-        if (member != null && book != null) {
-            member.removeBorrowedBook(bookId);
-            book.setAvailable(true);
-        }
-    }
-
-    public Map<String, Book> getAllBooks() {
-        return allBooks;
+    public void returnBook(Member member, Book book) {
+        member.removeBorrowedBook(book.getBookId());
+        book.setAvailable(true);
     }
 }

@@ -19,10 +19,6 @@ public class Book {
         this.isAvailable = true;
     }
 
-    public boolean checkAvailability() {
-        return isAvailable;
-    }
-
     public void updateBookInfo(String name, String author, int year, String isbn, String genre) {
         this.name = name;
         this.author = author;
@@ -38,6 +34,10 @@ public class Book {
 
     public void setAvailable(boolean available) {
         isAvailable = available;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
     }
 
     public String getBookId() {

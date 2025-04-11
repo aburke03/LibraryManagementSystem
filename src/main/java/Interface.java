@@ -82,7 +82,13 @@ public class Interface {
         String memberId = scanner.nextLine();
         System.out.print("Enter book ID: ");
         String bookId = scanner.nextLine();
-        library.checkoutBook(memberId, bookId);
+        Member member = library.getMemberById(memberId);
+        Book book = library.getBookById(bookId);
+        if (member == null || book == null) {
+            System.out.println("Invalid member or book ID.");
+            return;
+        }
+        library.checkoutBook(member, book);
     }
 
     private void returnBook() {
@@ -90,11 +96,17 @@ public class Interface {
         String memberId = scanner.nextLine();
         System.out.print("Enter book ID: ");
         String bookId = scanner.nextLine();
-        library.returnBook(memberId, bookId);
+        Member member = library.getMemberById(memberId);
+        Book book = library.getBookById(bookId);
+        if (member == null || book == null) {
+            System.out.println("Invalid member or book ID.");
+            return;
+        }
+        library.returnBook(member, book);
     }
 
     private void viewBooks() {
-        for (Book book : library.getAllBooks().values()) {
+        for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
     }
