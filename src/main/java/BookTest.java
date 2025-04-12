@@ -2,11 +2,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import net.jqwik.api.Property;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.constraints.AlphaChars;
+import net.jqwik.api.constraints.StringLength;
+import net.jqwik.api.constraints.IntRange;
+
 /**
- * Specification-based test class for Book
- * Tests the functionality of the Book class according to its requirements
+ * Test suite for the Book class in the Library Management System.
+ * This suite combines specification-based testing, structural testing (for JaCoCo code coverage),
+ * and property-based testing using jqwik.
  */
 public class BookTest {
+
     private Book book;
     private final String name = "The Hobbit";
     private final String author = "J.R.R. Tolkien";
@@ -16,21 +24,24 @@ public class BookTest {
     private final String genre = "Fantasy";
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Create a new book instance before each test
         book = new Book(name, author, year, isbn, bookId, genre);
     }
 
+    // SPECIFICATION-BASED TESTS
+    // These tests verify that the Book class meets its functional requirements
+
     @Test
-    void testBookCreation() {
+    public void testBookCreation() {
         // Specification-based test: Test that book is created with correct parameters
-        assertEquals(name, book.getName());
-        assertEquals(bookId, book.getBookId());
-        assertTrue(book.isAvailable());
+        assertEquals(name, book.getName(), "Book name should match the constructor parameter");
+        assertEquals(bookId, book.getBookId(), "Book ID should match the constructor parameter");
+        assertTrue(book.isAvailable(), "A newly created book should be available by default");
     }
 
     @Test
-    void testUpdateBookInfo() {
+    public void testUpdateBookInfo() {
         // Specification-based test: Test that book info can be updated
         String newName = "The Lord of the Rings";
         String newAuthor = "J.R.R. Tolkien";
@@ -41,36 +52,158 @@ public class BookTest {
         book.updateBookInfo(newName, newAuthor, newYear, newIsbn, newGenre);
         String bookInfo = book.getBookInfo();
 
-        assertTrue(bookInfo.contains(newName));
-        assertTrue(bookInfo.contains(newAuthor));
-        assertTrue(bookInfo.contains(String.valueOf(newYear)));
-        assertTrue(bookInfo.contains(newIsbn));
-        assertTrue(bookInfo.contains(newGenre));
+        assertTrue(bookInfo.contains(newName), "Book info should contain the updated name");
+        assertTrue(bookInfo.contains(newAuthor), "Book info should contain the updated author");
+        assertTrue(bookInfo.contains(String.valueOf(newYear)), "Book info should contain the updated year");
+        assertTrue(bookInfo.contains(newIsbn), "Book info should contain the updated ISBN");
+        assertTrue(bookInfo.contains(newGenre), "Book info should contain the updated genre");
+        assertTrue(bookInfo.contains(bookId), "Book ID should remain unchanged after update");
     }
 
     @Test
-    void testBookAvailability() {
+    public void testBookAvailability() {
         // Specification-based test: Test that book availability can be toggled
-        assertTrue(book.isAvailable());
-        
+        assertTrue(book.isAvailable(), "A newly created book should be available by default");
+
         book.setAvailable(false);
-        assertFalse(book.isAvailable());
-        
+        assertFalse(book.isAvailable(), "Book should be unavailable after setting available to false");
+
         book.setAvailable(true);
-        assertTrue(book.isAvailable());
+        assertTrue(book.isAvailable(), "Book should be available after setting available back to true");
+    }
+
+    // STRUCTURAL TESTS
+    // These tests are designed to achieve high code coverage with JaCoCo
+
+    @Test
+    public void testGetBookInfo() {
+        // Structural test: Test that getBookInfo method returns a properly formatted string
+        // with all the expected book properties
+        String bookInfo = book.getBookInfo();
+
+        // Verify the bookInfo string contains all book fields
+        assertTrue(bookInfo.contains("ID: " + bookId), "Book info should contain the ID field");
+        assertTrue(bookInfo.contains("Name: " + name), "Book info should contain the name field");
+        assertTrue(bookInfo.contains("Author: " + author), "Book info should contain the author field");
+        assertTrue(bookInfo.contains("Year: " + year), "Book info should contain the year field");
+        assertTrue(bookInfo.contains("ISBN: " + isbn), "Book info should contain the ISBN field");
+        assertTrue(bookInfo.contains("Genre: " + genre), "Book info should contain the genre field");
+        assertTrue(bookInfo.contains("Available: true"), "Book info should contain the availability status");
     }
 
     @Test
-    void testGetBookInfo() {
-        // Specification-based test: Test that book info contains all expected data
+    public void testGetBookInfoAfterAvailabilityChange() {
+        // Structural test: Test that availability status changes are reflected in getBookInfo
+        book.setAvailable(false);
         String bookInfo = book.getBookInfo();
-        
-        assertTrue(bookInfo.contains(name));
-        assertTrue(bookInfo.contains(author));
-        assertTrue(bookInfo.contains(String.valueOf(year)));
-        assertTrue(bookInfo.contains(isbn));
-        assertTrue(bookInfo.contains(bookId));
-        assertTrue(bookInfo.contains(genre));
-        assertTrue(bookInfo.contains("true")); // availability
+
+        assertTrue(bookInfo.contains("Available: false"),
+                "Book info should show false availability after setting available to false");
+    }
+
+    @Test
+    public void testGetName() {
+        // Structural test: Test the getName getter
+        assertEquals(name, book.getName(), "getName should return the book's name");
+    }
+
+    @Test
+    public void testGetBookId() {
+        // Structural test: Test the getBookId getter
+        assertEquals(bookId, book.getBookId(), "getBookId should return the book's ID");
+    }
+
+    // PROPERTY-BASED TESTS
+    // These tests use jqwik to verify properties that should hold for any valid inputs
+
+    @Property
+    public void NewBookIsAlwaysAvailable(
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookName,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookAuthor,
+            @ForAll @IntRange(min = 1000, max = 2023) int bookYear,
+            @ForAll @StringLength(min = 10, max = 17) String bookIsbn,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 10) String id,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 20) String bookGenre
+    ) {
+        // Property-based test: A newly created book should always be available
+        Book testBook = new Book(bookName, bookAuthor, bookYear, bookIsbn, id, bookGenre);
+        assertTrue(testBook.isAvailable(), "Property: A newly created book should always be available");
+    }
+
+    @Property
+    public void propertyBookInfoContainsAllFields(
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookName,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookAuthor,
+            @ForAll @IntRange(min = 1000, max = 2023) int bookYear,
+            @ForAll @StringLength(min = 10, max = 17) String bookIsbn,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 10) String id,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 20) String bookGenre
+    ) {
+        // Property-based test: Book info should contain all book properties
+        Book testBook = new Book(bookName, bookAuthor, bookYear, bookIsbn, id, bookGenre);
+        String bookInfo = testBook.getBookInfo();
+
+        assertTrue(bookInfo.contains(bookName), "Property: Book info should contain the book name");
+        assertTrue(bookInfo.contains(bookAuthor), "Property: Book info should contain the author name");
+        assertTrue(bookInfo.contains(String.valueOf(bookYear)), "Property: Book info should contain the year");
+        assertTrue(bookInfo.contains(bookIsbn), "Property: Book info should contain the ISBN");
+        assertTrue(bookInfo.contains(id), "Property: Book info should contain the book ID");
+        assertTrue(bookInfo.contains(bookGenre), "Property: Book info should contain the genre");
+    }
+
+    @Property
+    public void propertyAvailabilityCanBeToggled(
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookName,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 50) String bookAuthor,
+            @ForAll @IntRange(min = 1000, max = 2023) int bookYear,
+            @ForAll @StringLength(min = 10, max = 17) String bookIsbn,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 10) String id,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 20) String bookGenre
+    ) {
+        // Property-based test: Book availability can be toggled regardless of other properties
+        Book testBook = new Book(bookName, bookAuthor, bookYear, bookIsbn, id, bookGenre);
+
+        // Set to false and verify
+        testBook.setAvailable(false);
+        assertFalse(testBook.isAvailable(), "Property: Book should be unavailable after setting available to false");
+
+        // Set to true and verify
+        testBook.setAvailable(true);
+        assertTrue(testBook.isAvailable(), "Property: Book should be available after setting available to true");
+    }
+
+    @Property
+    public void propertyUpdateReflectedInBookInfo(
+            // Original book properties
+            @ForAll @AlphaChars @StringLength(min = 1, max = 30) String origName,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 30) String origAuthor,
+            @ForAll @IntRange(min = 1000, max = 2000) int origYear,
+            @ForAll @StringLength(min = 10, max = 17) String origIsbn,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 10) String id,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 20) String origGenre,
+
+            // Updated book properties
+            @ForAll @AlphaChars @StringLength(min = 1, max = 30) String newName,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 30) String newAuthor,
+            @ForAll @IntRange(min = 1000, max = 2023) int newYear,
+            @ForAll @StringLength(min = 10, max = 17) String newIsbn,
+            @ForAll @AlphaChars @StringLength(min = 1, max = 20) String newGenre
+    ) {
+        // Property-based test: Updates to book information should be reflected in getBookInfo
+        Book testBook = new Book(origName, origAuthor, origYear, origIsbn, id, origGenre);
+
+        // Update the book info
+        testBook.updateBookInfo(newName, newAuthor, newYear, newIsbn, newGenre);
+        String bookInfo = testBook.getBookInfo();
+
+        // Check that new values are reflected in the book info
+        assertTrue(bookInfo.contains(newName), "Property: Updated name should be reflected in book info");
+        assertTrue(bookInfo.contains(newAuthor), "Property: Updated author should be reflected in book info");
+        assertTrue(bookInfo.contains(String.valueOf(newYear)), "Property: Updated year should be reflected in book info");
+        assertTrue(bookInfo.contains(newIsbn), "Property: Updated ISBN should be reflected in book info");
+        assertTrue(bookInfo.contains(newGenre), "Property: Updated genre should be reflected in book info");
+
+        // ID should remain unchanged
+        assertTrue(bookInfo.contains(id), "Property: Book ID should remain unchanged after update");
     }
 }
