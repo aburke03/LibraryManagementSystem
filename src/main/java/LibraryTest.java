@@ -118,6 +118,13 @@ public class LibraryTest {
                 "whoHasBook should return the name of the member who first checked out the book.");
     }
 
+    @Test
+    public void testFindBookByNameNoMatch() {
+        // Test findBookByName with a name that doesn't match any book
+        assertNull(library.findBookByName("NonExistentBook"),
+                "findBookByName should return null for a non-existent book name");
+    }
+
     // Property-based tests using jqwik
 
     @Property
