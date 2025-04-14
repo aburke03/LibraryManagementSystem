@@ -1,21 +1,12 @@
 import java.util.*;
 
-/**
- * Command-line interface for interacting with the Library system.
- * Allows users to perform actions such as adding/removing books and members,
- * checking out and returning books, and viewing records.
- */
-
 public class Interface {
     private Library library = new Library();
     private Scanner scanner = new Scanner(System.in);
 
-    /**
-     * Starts the main loop for the command-line interface.
-     * Continuously presents the user with options until exit is selected.
-     */
     public void start() {
-        while (true) {
+        int choice;
+        do {
             System.out.println("\nLIBRARY MANAGEMENT SYSTEM:");
             System.out.println("1. Add Book");
             System.out.println("2. Remove Book");
@@ -27,21 +18,7 @@ public class Interface {
             System.out.println("8. View All Members");
             System.out.println("9. Exit");
             System.out.print("Choose an option: ");
-
-            if (!scanner.hasNextLine()) {
-                System.out.println("No input detected. Exiting...");
-                break;
-            }
-
-            String input = scanner.nextLine();
-            int choice;
-
-            try {
-                choice = Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid choice.");
-                continue;
-            }
+            choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
                 case 1 -> addBook();
@@ -52,16 +29,13 @@ public class Interface {
                 case 6 -> returnBook();
                 case 7 -> viewBooks();
                 case 8 -> viewMembers();
-                case 9 -> {
-                    System.out.println("Exiting...");
-                    return;
-                }
+                case 9 -> System.out.println("Exiting...");
                 default -> System.out.println("Invalid choice.");
             }
-        }
+
+        } while (choice != 9);
     }
 
-    //Prompts the user for book details and adds it to the library.
     private void addBook() {
         System.out.print("Enter title: ");
         String title = scanner.nextLine();
@@ -80,14 +54,12 @@ public class Interface {
         library.addBook(book);
     }
 
-    //Prompts the user for a book ID and removes the book from the library.
     private void removeBook() {
         System.out.print("Enter book ID to remove: ");
         String id = scanner.nextLine();
         library.removeBook(id);
     }
 
-    //Prompts the user for member details and adds the member to the library.
     private void addMember() {
         System.out.print("Enter name: ");
         String name = scanner.nextLine();
@@ -99,14 +71,12 @@ public class Interface {
         library.addMember(member);
     }
 
-    //Prompts the user for a member ID and removes the member from the library.
     private void removeMember() {
         System.out.print("Enter member ID to remove: ");
         String id = scanner.nextLine();
         library.revokeMembership(id);
     }
 
-    //Prompts for member and book IDs and performs a book checkout if valid.
     private void checkoutBook() {
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
@@ -121,7 +91,6 @@ public class Interface {
         library.checkoutBook(member, book);
     }
 
-     //Prompts for member and book IDs and returns the book if valid.
     private void returnBook() {
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
@@ -136,17 +105,15 @@ public class Interface {
         library.returnBook(member, book);
     }
 
-    //Displays information for all books in the library.
     private void viewBooks() {
         for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
     }
 
-    //Displays information for all members in the library.
     private void viewMembers() {
         for (Member member : library.getAllMembers()) {
-            System.out.println(member.getMemberInfo());
+            member.printMemberInfo();
         }
     }
 }
