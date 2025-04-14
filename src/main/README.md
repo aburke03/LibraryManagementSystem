@@ -1,4 +1,4 @@
-# Library Management System
+# Library Management System - Group G
 
 ## Overview
 A command-line-based library system for managing books and members, built with Java and Maven.
@@ -7,6 +7,8 @@ A command-line-based library system for managing books and members, built with J
 1. Clone the repo and open in IntelliJ.
 2. Run `LibraryManagementSystem.java`'s `main()`method.
 3. Proceed to select your desired option in the CLI below.
+4. For testing, upon running each test file with coverage, you will see each class has 100% coverage
+using specification, structural and property based testing when appropriate.
 
 ## CLI Usage
 The librarian can:

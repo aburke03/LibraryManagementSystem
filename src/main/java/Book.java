@@ -26,7 +26,7 @@ public class Book {
     }
 
 
-    //Updates the book's descriptive fields.
+    //Updates the book's fields.
     public void updateBookInfo(String name, String author, int year, String isbn, String genre) {
         this.name = name;
         this.author = author;
@@ -35,7 +35,7 @@ public class Book {
         this.genre = genre;
     }
 
-    //Returns a formatted string with all book details.
+    //Returns a formatted string with all the book's details.
     public String getBookInfo() {
         return String.format("ID: %s | Name: %s | Author: %s | Year: %d | ISBN: %s | Genre: %s | Available: %b",
                 bookId, name, author, year, isbn, genre, isAvailable);
@@ -51,7 +51,7 @@ public class Book {
         return isAvailable;
     }
 
-    //Returns the unique ID of the book.
+    //Returns the ID of the book.
     public String getBookId() {
         return bookId;
     }

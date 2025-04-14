@@ -11,11 +11,7 @@ public class Member {
     private String memberId;
     private List<Book> borrowedBooks;
 
-    /**
-     * Constructs a new member with the given name, email, and ID.
-     *
-     * @throws IllegalArgumentException if any field is null.
-     */
+    //Constructs a new member with the given name, email, and ID.
     public Member(String name, String email, String memberId) {
         if (name == null || email == null || memberId == null) {
             throw new IllegalArgumentException("null field!");
@@ -25,7 +21,6 @@ public class Member {
         this.memberId = memberId;
         this.borrowedBooks = new ArrayList<>();
     }
-
 
     //Returns a formatted string with member details.
     public String getMemberInfo() {
@@ -41,12 +36,7 @@ public class Member {
     public void addBorrowedBook(Book book) {
         if (!borrowedBooks.contains(book)) borrowedBooks.add(book);
     }
-
-    /**
-     * Removes a book from the borrowed list by its ID.
-     *
-     * @throws IllegalArgumentException if the ID is null.
-     */
+    //Removes a book from the borrowed list by its ID.
     public void removeBorrowedBook(String bookId) {
         if (bookId == null) throw new IllegalArgumentException("null field!");
         borrowedBooks.removeIf(book -> book.getBookId().equals(bookId));
@@ -58,18 +48,15 @@ public class Member {
         this.email = email;
     }
 
-
     //Returns the member's name.
     public String getName() {
         return name;
     }
 
-
     //Returns the member's email address.
     public String getEmail() {
         return email;
     }
-
 
     //Returns the member's unique ID.
     public String getMemberId() {

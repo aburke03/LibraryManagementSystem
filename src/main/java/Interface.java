@@ -136,14 +136,14 @@ public class Interface {
         library.returnBook(member, book);
     }
 
-    //Displays information for all books in the library.
+    //Prints information for all books in the library.
     private void viewBooks() {
         for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
     }
 
-    //Displays information for all members in the library.
+    //Prints information for all members in the library.
     private void viewMembers() {
         for (Member member : library.getAllMembers()) {
             System.out.println(member.getMemberInfo());
