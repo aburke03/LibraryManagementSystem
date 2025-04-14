@@ -15,12 +15,6 @@ The librarian can:
 - Checkout/Return Books
 - View book/member details
 
-## Team Roles
-- 
--
--
--
-
 ## Design Decisions
 - Used `Map` for fast lookups by ID
 - CLI implemented as modular switch-case structure
