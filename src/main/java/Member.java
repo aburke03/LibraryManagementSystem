@@ -7,14 +7,17 @@ public class Member {
     private List<Book> borrowedBooks;
 
     public Member(String name, String email, String memberId) {
+        if (name == null || email == null || memberId == null) {
+            throw new IllegalArgumentException("null field!");
+        }
         this.name = name;
         this.email = email;
         this.memberId = memberId;
         this.borrowedBooks = new ArrayList<>();
     }
 
-    public void printMemberInfo() {
-        System.out.printf("ID: %s | Name: %s | Email: %s\n", memberId, name, email);
+    public String getMemberInfo() {
+        return String.format("ID: %s | Name: %s | Email: %s\n", memberId, name, email);
     }
 
     public List<Book> getBorrowedBookList() {
@@ -22,10 +25,11 @@ public class Member {
     }
 
     public void addBorrowedBook(Book book) {
-        borrowedBooks.add(book);
+        if (!borrowedBooks.contains(book)) borrowedBooks.add(book);
     }
 
     public void removeBorrowedBook(String bookId) {
+        if (bookId == null) throw new IllegalArgumentException("null field!");
         borrowedBooks.removeIf(book -> book.getBookId().equals(bookId));
     }
 
@@ -36,6 +40,10 @@ public class Member {
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getMemberId() {

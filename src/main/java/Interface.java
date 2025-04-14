@@ -113,7 +113,7 @@ public class Interface {
 
     private void viewMembers() {
         for (Member member : library.getAllMembers()) {
-            member.printMemberInfo();
+            System.out.println(member.getMemberInfo());
         }
     }
 }
