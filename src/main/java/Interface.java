@@ -109,12 +109,14 @@ public class Interface {
     }
 
     private void addBook() {
+        // Add a new book to the library
         Book book = promptBookDetails();
         library.addBook(book);
         System.out.println("Added book: " + book.getBookInfo());
     }
 
     private void removeBook() {
+        // Remove a book by its ID if it exists
         System.out.print("Enter book ID to remove: ");
         String id = scanner.nextLine();
         library.removeBook(id);
@@ -122,6 +124,7 @@ public class Interface {
     }
 
     private void addMember() {
+        // Create and add a new member to the library
         System.out.print("Enter name: ");
         String name = scanner.nextLine();
         System.out.print("Enter email: ");
@@ -134,6 +137,7 @@ public class Interface {
     }
 
     private void removeMember() {
+        // Revoke a member's membership (fulltime only)
         if (!isFullTime) {
             System.out.println("Only full‑time librarians may revoke memberships.");
             return;
@@ -145,6 +149,7 @@ public class Interface {
     }
 
     private void checkoutBook() {
+        // Handle book checkout, including purchase flow for fulltime librarians
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
         Member member = library.getMemberById(memberId);
@@ -161,6 +166,7 @@ public class Interface {
             if (isFullTime) {
                 System.out.print("Book not found. Purchase and add it? (y/n): ");
                 if (scanner.nextLine().equalsIgnoreCase("y")) {
+                    // Attempt book purchase and handle insufficient funds
                     try {
                         double cost = accounts.orderNewBook();
                         accounts.getLibrarians().recordBookPurchase(currentLibrarianCode, cost);
@@ -188,6 +194,7 @@ public class Interface {
     }
 
     private void returnBook() {
+        // Handle returning a checked out book
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
         System.out.print("Enter book ID: ");
@@ -203,12 +210,14 @@ public class Interface {
     }
 
     private void viewBooks() {
+        // Display all books currently in the library
         for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
     }
 
     private void viewMembers() {
+        // Display all registered library members
         for (Member member : library.getAllMembers()) {
             System.out.println(member.getMemberInfo());
         }
@@ -227,6 +236,7 @@ public class Interface {
             System.out.println("Invalid amount.");
             return;
         }
+        // catch any IllegalArgumentException from negative or other invalid amounts
         try {
             accounts.addDonation(amount);
             System.out.println("Donation added. New balance: $" + accounts.getOperatingCashBalance());
@@ -236,6 +246,7 @@ public class Interface {
     }
 
     private void withdrawSalary() {
+        // Withdraw salary from operating cash and record it (fulltime only)
         if (!isFullTime) {
             System.out.println("Only full‑time librarians may withdraw salary.");
             return;
@@ -250,7 +261,7 @@ public class Interface {
         }
         try {
             accounts.withdrawSalary(currentLibrarianCode, amount);
-            System.out.println("Withdrew $" + amount + ". New balance: "
+            System.out.println("Withdrew $" + amount + ". New balance: $"
                     + accounts.getOperatingCashBalance());
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
