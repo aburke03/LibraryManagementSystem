@@ -1,20 +1,22 @@
 import java.util.*;
 
 /**
- * Command-line interface for interacting with the Library system.
- * Allows users to perform actions such as adding/removing books and members,
- * checking out and returning books, and viewing records.
+ * Command-line interface for interacting with the Library management system,
+ * with full-time vs. volunteer authentication.
  */
-
 public class Interface {
-    private Library library = new Library();
-    private Scanner scanner = new Scanner(System.in);
+    private Library library         = new Library();
+    private LibraryAccounts accounts = new LibraryAccounts();
+    private Scanner scanner         = new Scanner(System.in);
 
-    /**
-     * Starts the main loop for the command-line interface.
-     * Continuously presents the user with options until exit is selected.
-     */
+    // Authentication state
+    private boolean isFullTime          = false;
+    private String  currentLibrarianCode = null;
+
     public void start() {
+        // Entry point: authenticate user and start main CLI loop
+        authenticateUser();
+
         while (true) {
             System.out.println("\nLIBRARY MANAGEMENT SYSTEM:");
             System.out.println("1. Add Book");
@@ -25,34 +27,34 @@ public class Interface {
             System.out.println("6. Return Book");
             System.out.println("7. View All Books");
             System.out.println("8. View All Members");
-            System.out.println("9. Exit");
+            System.out.println("9. Add Donation");
+            System.out.println("10. Withdraw Salary");
+            System.out.println("11. Exit");
             System.out.print("Choose an option: ");
-
-            if (!scanner.hasNextLine()) {
-                System.out.println("No input detected. Exiting...");
-                break;
-            }
 
             String input = scanner.nextLine();
             int choice;
-
             try {
+                // Parse user menu choice
                 choice = Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 System.out.println("Invalid choice.");
                 continue;
             }
 
+            // Dispatch user choice to corresponding action
             switch (choice) {
-                case 1 -> addBook();
-                case 2 -> removeBook();
-                case 3 -> addMember();
-                case 4 -> removeMember();
-                case 5 -> checkoutBook();
-                case 6 -> returnBook();
-                case 7 -> viewBooks();
-                case 8 -> viewMembers();
-                case 9 -> {
+                case 1  -> addBook();
+                case 2  -> removeBook();
+                case 3  -> addMember();
+                case 4  -> removeMember();
+                case 5  -> checkoutBook();
+                case 6  -> returnBook();
+                case 7  -> viewBooks();
+                case 8  -> viewMembers();
+                case 9  -> addDonation();
+                case 10 -> withdrawSalary();
+                case 11 -> {
                     System.out.println("Exiting...");
                     return;
                 }
@@ -61,34 +63,61 @@ public class Interface {
         }
     }
 
-    //Prompts the user for book details and adds it to the library.
-    private void addBook() {
+    private void authenticateUser() {
+        // Prompt for and validate fulltime librarian code
+        System.out.print("Enter full‑time librarian code (or press Enter for volunteer): ");
+        String code = scanner.nextLine().trim();
+        if (!code.isEmpty() && accounts.getLibrarians().authenticate(code)) {
+            isFullTime = true;
+            currentLibrarianCode = code;
+            System.out.println("Authenticated as full‑time librarian: "
+                    + accounts.getLibrarians().getName(code));
+        } else {
+            isFullTime = false;
+            System.out.println("Proceeding as volunteer librarian (limited permissions).");
+        }
+    }
+
+    private Book promptBookDetails() {
+        // Collect book details from CLI and return a new Book instance
         System.out.print("Enter title: ");
         String title = scanner.nextLine();
         System.out.print("Enter author: ");
         String author = scanner.nextLine();
         System.out.print("Enter year: ");
-        int year = Integer.parseInt(scanner.nextLine());
+        int year;
+        try {
+            year = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid year; defaulting to 0.");
+            year = 0;
+        }
         System.out.print("Enter ISBN: ");
         String isbn = scanner.nextLine();
         System.out.print("Enter book ID: ");
         String bookId = scanner.nextLine();
         System.out.print("Enter genre: ");
         String genre = scanner.nextLine();
-
-        Book book = new Book(title, author, year, isbn, bookId, genre);
-        library.addBook(book);
+        return new Book(title, author, year, isbn, bookId, genre);
     }
 
-    //Prompts the user for a book ID and removes the book from the library.
+    private void addBook() {
+        // Add a new book to the library
+        Book book = promptBookDetails();
+        library.addBook(book);
+        System.out.println("Added book: " + book.getBookInfo());
+    }
+
     private void removeBook() {
+        // Remove a book by its ID if it exists
         System.out.print("Enter book ID to remove: ");
         String id = scanner.nextLine();
         library.removeBook(id);
+        System.out.println("Removed book ID " + id + " (if it existed).");
     }
 
-    //Prompts the user for member details and adds the member to the library.
     private void addMember() {
+        // Create and add a new member to the library
         System.out.print("Enter name: ");
         String name = scanner.nextLine();
         System.out.print("Enter email: ");
@@ -97,32 +126,68 @@ public class Interface {
         String id = scanner.nextLine();
         Member member = new Member(name, email, id);
         library.addMember(member);
+        System.out.println("Added member: " + member.getMemberInfo());
     }
 
-    //Prompts the user for a member ID and removes the member from the library.
     private void removeMember() {
+        // Revoke a member's membership (fulltime only)
+        if (!isFullTime) {
+            System.out.println("Only full‑time librarians may revoke memberships.");
+            return;
+        }
         System.out.print("Enter member ID to remove: ");
         String id = scanner.nextLine();
         library.revokeMembership(id);
+        System.out.println("Revoked membership for ID " + id + " (if it existed).");
     }
 
-    //Prompts for member and book IDs and performs a book checkout if valid.
     private void checkoutBook() {
+        // Handle book checkout, including purchase flow for fulltime librarians
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
-        System.out.print("Enter book ID: ");
-        String bookId = scanner.nextLine();
         Member member = library.getMemberById(memberId);
-        Book book = library.getBookById(bookId);
-        if (member == null || book == null) {
-            System.out.println("Invalid member or book ID.");
+        if (member == null) {
+            System.out.println("Invalid member ID.");
             return;
         }
+
+        System.out.print("Enter book ID: ");
+        String bookId = scanner.nextLine();
+        Book book = library.getBookById(bookId);
+
+        if (book == null) {
+            if (isFullTime) {
+                System.out.print("Book not found. Purchase and add it? (y/n): ");
+                if (scanner.nextLine().equalsIgnoreCase("y")) {
+                    // Attempt book purchase and handle insufficient funds
+                    try {
+                        double cost = accounts.orderNewBook();
+                        accounts.getLibrarians().recordBookPurchase(currentLibrarianCode, cost);
+                        System.out.println("Purchased for $" + cost);
+                        System.out.println("Now enter its details:");
+                        Book newBook = promptBookDetails();
+                        library.addBook(newBook);
+                        book = newBook;
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Purchase failed: " + e.getMessage());
+                        return;
+                    }
+                } else {
+                    System.out.println("Purchase cancelled; checkout aborted.");
+                    return;
+                }
+            } else {
+                System.out.println("Book not found. Please call a full‑time librarian for assistance.");
+                return;
+            }
+        }
+
         library.checkoutBook(member, book);
+        System.out.println("Checked out \"" + book.getName() + "\" to " + member.getName());
     }
 
-    //Prompts for member and book IDs and returns the book if valid.
     private void returnBook() {
+        // Handle returning a checked out book
         System.out.print("Enter member ID: ");
         String memberId = scanner.nextLine();
         System.out.print("Enter book ID: ");
@@ -134,19 +199,66 @@ public class Interface {
             return;
         }
         library.returnBook(member, book);
+        System.out.println("Returned \"" + book.getName() + "\" from " + member.getName());
     }
 
-    //Prints information for all books in the library.
     private void viewBooks() {
+        // Display all books currently in the library
         for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
     }
 
-    //Prints information for all members in the library.
     private void viewMembers() {
+        // Display all registered library members
         for (Member member : library.getAllMembers()) {
             System.out.println(member.getMemberInfo());
+        }
+    }
+
+    private void addDonation() {
+        if (!isFullTime) {
+            System.out.println("Only full‑time librarians may add donations.");
+            return;
+        }
+        System.out.print("Enter donation amount: ");
+        double amount;
+        try {
+            amount = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount.");
+            return;
+        }
+
+        // catch any IllegalArgumentException from negative or other invalid amounts
+        try {
+            accounts.addDonation(amount);
+            System.out.println("Donation added. New balance: $" + accounts.getOperatingCashBalance());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void withdrawSalary() {
+        // Withdraw salary from operating cash and record it (fulltime only)
+        if (!isFullTime) {
+            System.out.println("Only full‑time librarians may withdraw salary.");
+            return;
+        }
+        System.out.print("Enter salary withdrawal amount: ");
+        double amount;
+        try {
+            amount = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount.");
+            return;
+        }
+        try {
+            accounts.withdrawSalary(currentLibrarianCode, amount);
+            System.out.println("Withdrew $" + amount + ". New balance: $"
+                    + accounts.getOperatingCashBalance());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
