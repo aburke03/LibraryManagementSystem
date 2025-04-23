@@ -7,14 +7,15 @@ import java.util.*;
 public class Interface {
     private Library library         = new Library();
     private LibraryAccounts accounts = new LibraryAccounts();
-    private Scanner scanner         = new Scanner(System.in);
+    private Scanner scanner;
 
     // Authentication state
     private boolean isFullTime          = false;
     private String  currentLibrarianCode = null;
 
     public void start() {
-        // Startup banner — only prints once
+        scanner = new Scanner(System.in);
+        // Print group names on startup
         System.out.println("----------------------------------------------------------------");
         System.out.println("                   LIBRARY MANAGEMENT SYSTEM");
         System.out.println("                         GROUP G");
@@ -72,7 +73,7 @@ public class Interface {
 
     private void authenticateUser() {
         // Prompt for and validate fulltime librarian code
-        System.out.print("Enter Full‑Time Librarian Code (or press Enter for Volunteer): ");
+        System.out.print("Enter Full‑Time Librarian Code (or press Enter for Part-Time / Volunteer): ");
         String code = scanner.nextLine().trim();
         if (!code.isEmpty() && accounts.getLibrarians().authenticate(code)) {
             isFullTime = true;
