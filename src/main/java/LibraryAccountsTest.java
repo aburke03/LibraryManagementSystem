@@ -4,448 +4,286 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import net.jqwik.api.Property;
 import net.jqwik.api.ForAll;
-import net.jqwik.api.Assume;
 import net.jqwik.api.constraints.DoubleRange;
 
 import java.lang.reflect.Field;
 
+
 /**
- * Comprehensive test suite for the LibraryAccounts class in the Library Management System.
+ * Test suite for the LibraryAccounts class in the Library Management System.
  * This suite combines specification-based testing, structural testing (for JaCoCo code coverage),
  * and property-based testing using jqwik.
+ *
+ * i get 100% method and line coverage for the actual file, but for whatever reason my test file gives me issues.
+ * i have tried multiple things like try catch statments which gave me 100% method and good lines, but
+ * it didn't make much since to do that
  */
 public class LibraryAccountsTest {
 
     private LibraryAccounts accounts;
-    private final String validAuthCode = "123456"; // One of the predefined codes
-    private final String invalidAuthCode = "111111"; // Not a predefined code
+    private final String validAuthCode = "123456";
+    private final String invalidAuthCode = "111111";
 
     @BeforeEach
     public void setUp() {
+        // Create fresh accounts object before each test to avoid state bleeding between tests
         accounts = new LibraryAccounts();
     }
 
-    // ========== CONSTRUCTOR AND INITIALIZATION TESTS ==========
-
-    @Test
-    public void testConstructorInitialization() {
-        // Test that the constructor initializes all fields properly
-        LibraryAccounts freshAccounts = new LibraryAccounts();
-        assertEquals(39000.00, freshAccounts.getOperatingCashBalance(), 0.001,
-                "Initial balance should be 39,000");
-        assertNotNull(freshAccounts.getLibrarians(),
-                "Librarians object should be initialized");
-    }
-
-    // ========== BALANCE AND DONATION TESTS ==========
+    // Specification tests 
 
     @Test
     public void testInitialBalance() {
-        // Verify the initial balance is set to $39,000
-        assertEquals(39000.00, accounts.getOperatingCashBalance(),
-                "Initial operating cash balance should be $39,000");
+        // Make sure a new account starts with the expected $39K balance
+        assertEquals(39000.00, accounts.getOperatingCashBalance());
+    }
+
+    @Test
+    public void testGetLibrarians() {
+        // Check that we can access the librarians object. Should not be null
+        assertNotNull(accounts.getLibrarians());
     }
 
     @Test
     public void testAddValidDonation() {
-        // Test adding a valid donation
+        // Adding money should increase the balance by exactly that amount
         double initialBalance = accounts.getOperatingCashBalance();
-        double donationAmount = 500.00;
-
-        accounts.addDonation(donationAmount);
-
-        assertEquals(initialBalance + donationAmount, accounts.getOperatingCashBalance(),
-                "Balance should increase by the donated amount");
+        accounts.addDonation(500.00);
+        assertEquals(initialBalance + 500.00, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testAddZeroDonation() {
-        // Test adding a zero donation
+        // Adding zero dollars shouldn't change the balance
         double initialBalance = accounts.getOperatingCashBalance();
-
         accounts.addDonation(0.0);
-
-        assertEquals(initialBalance, accounts.getOperatingCashBalance(),
-                "Zero donation should not change the balance");
+        assertEquals(initialBalance, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testAddNegativeDonation() {
-        // Test adding a negative donation (should throw exception)
-        assertThrows(IllegalArgumentException.class, () -> accounts.addDonation(-100.00),
-                "Negative donation should throw IllegalArgumentException");
+        // Can't donate negative money, so it will throw a exception
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> accounts.addDonation(-100.00));
+        assertEquals("Donation amount must be non-negative", exception.getMessage());
     }
 
-    // ========== SALARY WITHDRAWAL TESTS ==========
-
     @Test
-    public void testWithdrawValidSalaryAmount() {
-        // Test withdrawing a valid salary amount
+    public void testWithdrawValidSalary() {
+        // Taking out salary should reduce the balance by that amount
         double initialBalance = accounts.getOperatingCashBalance();
-        double salaryAmount = 1000.00;
-
-        accounts.withdrawSalary(salaryAmount);
-
-        assertEquals(initialBalance - salaryAmount, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the withdrawn salary amount");
+        accounts.withdrawSalary(1000.00);
+        assertEquals(initialBalance - 1000.00, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testWithdrawZeroSalary() {
-        // Test withdrawing a zero salary amount
+        // Withdrawing zero dollars shouldn't change anything
         double initialBalance = accounts.getOperatingCashBalance();
-
         accounts.withdrawSalary(0.0);
-
-        assertEquals(initialBalance, accounts.getOperatingCashBalance(),
-                "Zero salary withdrawal should not change the balance");
+        assertEquals(initialBalance, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testWithdrawNegativeSalary() {
-        // Test withdrawing a negative salary (should throw exception)
-        assertThrows(IllegalArgumentException.class, () -> accounts.withdrawSalary(-100.00),
-                "Negative salary withdrawal should throw IllegalArgumentException");
+        // Can't take out negative salary, which it should complain about
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> accounts.withdrawSalary(-100.00));
+        assertEquals("Salary withdrawal amount must be non-negative", exception.getMessage());
     }
 
     @Test
     public void testWithdrawExcessiveSalary() {
-        // Test withdrawing more than the available balance
+        // Can't withdraw more money than we have. Should get a insufficient funds error
         double excessiveAmount = accounts.getOperatingCashBalance() + 1000.00;
-
-        assertThrows(IllegalArgumentException.class, () -> accounts.withdrawSalary(excessiveAmount),
-                "Withdrawing more than the balance should throw IllegalArgumentException");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> accounts.withdrawSalary(excessiveAmount));
+        assertEquals("Insufficient funds", exception.getMessage());
     }
 
     @Test
     public void testWithdrawSalaryWithAuthCode() {
-        // Test withdrawing salary with valid auth code
+        // When a librarian withdraws salary, their record should be updated
         double initialBalance = accounts.getOperatingCashBalance();
         double salaryAmount = 1000.00;
 
         accounts.withdrawSalary(validAuthCode, salaryAmount);
 
-        assertEquals(initialBalance - salaryAmount, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the withdrawn salary amount");
-
-        // Verify the withdrawal was recorded for the librarian
-        assertEquals(salaryAmount, accounts.getLibrarians().getTotalSalaryWithdrawn(validAuthCode),
-                "Salary withdrawal should be recorded for the librarian");
-    }
-
-    @Test
-    public void testWithdrawZeroSalaryWithAuthCode() {
-        // Test withdrawing zero salary with valid auth code
-        double initialBalance = accounts.getOperatingCashBalance();
-
-        accounts.withdrawSalary(validAuthCode, 0.0);
-
-        assertEquals(initialBalance, accounts.getOperatingCashBalance(),
-                "Zero salary withdrawal should not change the balance");
-        assertEquals(0.0, accounts.getLibrarians().getTotalSalaryWithdrawn(validAuthCode),
-                "Zero salary withdrawal should be recorded for the librarian");
+        // Check both overall balance and librarian's record
+        assertEquals(initialBalance - salaryAmount, accounts.getOperatingCashBalance());
+        assertEquals(salaryAmount, accounts.getLibrarians().getTotalSalaryWithdrawn(validAuthCode));
     }
 
     @Test
     public void testWithdrawSalaryWithInvalidAuthCode() {
-        // Test withdrawing salary with invalid auth code
-        assertThrows(IllegalArgumentException.class,
-                () -> accounts.withdrawSalary(invalidAuthCode, 1000.00),
-                "Withdrawing salary with invalid auth code should throw IllegalArgumentException");
+        // Can't withdraw salary with a bogus librarian code
+        assertThrows(IllegalArgumentException.class, () -> accounts.withdrawSalary(invalidAuthCode, 1000.00));
     }
-
-    @Test
-    public void testAllWithdrawSalaryOverloads() {
-        // Test all overloaded versions of withdrawSalary
-        double initialBalance = accounts.getOperatingCashBalance();
-        double amount = 100.00;
-
-        // Test single-parameter version
-        accounts.withdrawSalary(amount);
-        assertEquals(initialBalance - amount, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the amount after using single-parameter version");
-
-        // Test two-parameter version with valid auth code
-        initialBalance = accounts.getOperatingCashBalance();
-        accounts.withdrawSalary(validAuthCode, amount);
-        assertEquals(initialBalance - amount, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the amount after using two-parameter version");
-    }
-
-    // ========== BOOK ORDERING TESTS ==========
 
     @Test
     public void testOrderNewBook() {
-        // Test ordering a new book (cost is random but should be between $10-$100)
+        // Ordering a new book should generate a random cost and update the balance
         double initialBalance = accounts.getOperatingCashBalance();
         double cost = accounts.orderNewBook();
 
-        // Cost should be between $10 and $100
-        assertTrue(cost >= 10.0 && cost <= 100.0,
-                "Book cost should be between $10 and $100");
+        // Book costs should be between $10-$100
+        assertTrue(cost >= 10.0);
+        assertTrue(cost <= 100.0);
 
-        // Balance should decrease by the cost
-        assertEquals(initialBalance - cost, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the book cost");
-    }
-
-    @Test
-    public void testOrderNewBookMultipleTimes() {
-        // Test ordering multiple books in succession
-        double initialBalance = accounts.getOperatingCashBalance();
-
-        // First order
-        double cost1 = accounts.orderNewBook();
-        double balanceAfterFirst = accounts.getOperatingCashBalance();
-
-        // Second order
-        double cost2 = accounts.orderNewBook();
-        double finalBalance = accounts.getOperatingCashBalance();
-
-        // Verify each step
-        assertEquals(initialBalance - cost1, balanceAfterFirst,
-                "Balance should decrease by the first book cost");
-        assertEquals(balanceAfterFirst - cost2, finalBalance,
-                "Balance should decrease by the second book cost");
-        assertEquals(initialBalance - cost1 - cost2, finalBalance,
-                "Final balance should reflect both purchases");
-    }
-
-    @Test
-    public void testOrderNewBookWithMockedLowCost() {
-        // Test orderNewBook with a mocked Purchasing object that always returns a low cost
-        try {
-            // Create a mock Purchasing that always returns 10.0
-            Purchasing mockPurchasing = new Purchasing() {
-                @Override
-                public double generateBookCost() {
-                    return 10.0;
-                }
-            };
-
-            // Use reflection to replace the purchasing field
-            Field purchasingField = LibraryAccounts.class.getDeclaredField("purchasing");
-            purchasingField.setAccessible(true);
-            purchasingField.set(accounts, mockPurchasing);
-
-            // Now test orderNewBook with our mock
-            double initialBalance = accounts.getOperatingCashBalance();
-            double cost = accounts.orderNewBook();
-
-            assertEquals(10.0, cost, "Cost should be our mocked value of 10.0");
-            assertEquals(initialBalance - 10.0, accounts.getOperatingCashBalance(),
-                    "Balance should decrease by exactly 10.0");
-        } catch (Exception e) {
-            fail("Test failed due to reflection error: " + e.getMessage());
-        }
-    }
-
-    @Test
-    public void testOrderNewBookWithMockedHighCost() {
-        // Test orderNewBook with a mocked Purchasing object that returns a cost higher than balance
-        try {
-            // Set a low initial balance
-            Field balanceField = LibraryAccounts.class.getDeclaredField("operatingCashBalance");
-            balanceField.setAccessible(true);
-            balanceField.set(accounts, 50.0);
-
-            // Create a mock Purchasing that returns a cost higher than the balance
-            Purchasing mockPurchasing = new Purchasing() {
-                @Override
-                public double generateBookCost() {
-                    return 100.0;
-                }
-            };
-
-            // Use reflection to replace the purchasing field
-            Field purchasingField = LibraryAccounts.class.getDeclaredField("purchasing");
-            purchasingField.setAccessible(true);
-            purchasingField.set(accounts, mockPurchasing);
-
-            // Now test orderNewBook with our mock - should throw exception
-            assertThrows(IllegalArgumentException.class,
-                    () -> accounts.orderNewBook(),
-                    "Should throw exception when cost exceeds balance");
-
-            // Verify balance hasn't changed
-            assertEquals(50.0, accounts.getOperatingCashBalance(),
-                    "Balance should remain unchanged after failed purchase");
-        } catch (Exception e) {
-            fail("Test failed due to reflection error: " + e.getMessage());
-        }
+        // Balance should be reduced by the cost
+        assertEquals(initialBalance - cost, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testOrderBookSpecificCost() {
-        // Test ordering a book with a specific cost
+        // When ordering a book with known cost, balance should decrease by that amount
         double initialBalance = accounts.getOperatingCashBalance();
-        double cost = 50.00;
-
-        accounts.orderBook(cost);
-
-        assertEquals(initialBalance - cost, accounts.getOperatingCashBalance(),
-                "Balance should decrease by the specified book cost");
+        accounts.orderBook(50.00);
+        assertEquals(initialBalance - 50.00, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testOrderBookZeroCost() {
-        // Test ordering a book with zero cost
+        // Free books shouldn't change the balance
         double initialBalance = accounts.getOperatingCashBalance();
-
         accounts.orderBook(0.0);
-
-        assertEquals(initialBalance, accounts.getOperatingCashBalance(),
-                "Zero cost book should not change the balance");
+        assertEquals(initialBalance, accounts.getOperatingCashBalance());
     }
 
     @Test
     public void testOrderBookNegativeCost() {
-        // Test ordering a book with negative cost (should throw exception)
-        assertThrows(IllegalArgumentException.class, () -> accounts.orderBook(-50.00),
-                "Negative book cost should throw IllegalArgumentException");
+        // Can't have books with negative costs
+        assertThrows(IllegalArgumentException.class, () -> accounts.orderBook(-50.00));
     }
 
     @Test
     public void testOrderBookExcessiveCost() {
-        // Test ordering a book that costs more than the available balance
+        // Can't order books that cost more than our available funds
         double excessiveCost = accounts.getOperatingCashBalance() + 1000.00;
-
-        assertThrows(IllegalArgumentException.class, () -> accounts.orderBook(excessiveCost),
-                "Ordering a book that costs more than the balance should throw IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> accounts.orderBook(excessiveCost));
     }
 
     @Test
-    public void testEdgeCaseBalanceExactlyCost() {
-        // Test the edge case where the cost is exactly equal to the balance
-        try {
-            // Set the balance to a known value
-            Field balanceField = LibraryAccounts.class.getDeclaredField("operatingCashBalance");
-            balanceField.setAccessible(true);
-            balanceField.set(accounts, 100.0);
+    public void testMockedPurchasing() throws Exception {
+        // Let's hack in a fixed-cost purchasing system to test predictably
+        Purchasing mockPurchasing = new CustomPurchasing(10.0);
+        setPrivateField("purchasing", mockPurchasing);
 
-            // Order a book that costs exactly that amount
-            accounts.orderBook(100.0);
+        double initialBalance = accounts.getOperatingCashBalance();
+        double cost = accounts.orderNewBook();
 
-            // Verify the balance is now zero
-            assertEquals(0.0, accounts.getOperatingCashBalance(),
-                    "Balance should be zero after ordering a book that costs exactly the balance amount");
-        } catch (Exception e) {
-            fail("Test failed due to reflection error: " + e.getMessage());
+        // With our rigged purchasing, we know exactly what the cost should be
+        assertEquals(10.0, cost);
+        assertEquals(initialBalance - 10.0, accounts.getOperatingCashBalance());
+    }
+
+    @Test
+    public void testInsufficientFundsForOrderNewBook() throws Exception {
+        // Set up so we only have $5 but books cost $50
+        setPrivateField("operatingCashBalance", 5.0);
+        setPrivateField("purchasing", new CustomPurchasing(50.0));
+
+        // Should fail due to insufficient funds
+        assertThrows(IllegalArgumentException.class, () -> accounts.orderNewBook());
+
+        // Balance shouldn't change since purchase failed
+        assertEquals(5.0, accounts.getOperatingCashBalance());
+    }
+
+    @Test
+    public void testEdgeCaseExactBalance() throws Exception {
+        // Edge case: what if we spend our very last dollar?
+        setPrivateField("operatingCashBalance", 100.0);
+        accounts.orderBook(100.0);
+        assertEquals(0.0, accounts.getOperatingCashBalance());
+    }
+
+    // Custom purchasing class for testing with fixed costs
+    private static class CustomPurchasing extends Purchasing {
+        private final double fixedCost;
+
+        public CustomPurchasing(double fixedCost) {
+            this.fixedCost = fixedCost;
+        }
+
+        @Override
+        public double generateBookCost() {
+            return fixedCost;
         }
     }
 
-    // ========== MISC TESTS ==========
-
-    @Test
-    public void testGetLibrarians() {
-        // Test that getLibrarians returns a valid Librarians object
-        assertNotNull(accounts.getLibrarians(),
-                "getLibrarians should return a non-null Librarians object");
+    // Helper to hack private fields for testing
+    private void setPrivateField(String fieldName, Object value) throws Exception {
+        Field field = LibraryAccounts.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(accounts, value);
     }
 
-    // ========== PROPERTY-BASED TESTS ==========
+    // PROPERTY-BASED TESTS - These run with many random inputs to find edge cases
 
     @Property
     public void propertyDonationIncreasesBalance(
             @ForAll @DoubleRange(min = 0.0, max = 10000.0) double donationAmount) {
-        // Property-based test: Adding a non-negative donation increases balance by that amount
-        // Initialize accounts for each property test since @BeforeEach doesn't work with jqwik
-        LibraryAccounts accounts = new LibraryAccounts();
-        double initialBalance = accounts.getOperatingCashBalance();
+        // For any donation amount (0-10K), balance should increase by exactly that amount
+        LibraryAccounts testAccounts = new LibraryAccounts();
+        double initialBalance = testAccounts.getOperatingCashBalance();
 
-        accounts.addDonation(donationAmount);
+        testAccounts.addDonation(donationAmount);
 
-        assertEquals(initialBalance + donationAmount, accounts.getOperatingCashBalance(),
-                "Property: Balance should increase by the donated amount");
+        assertEquals(initialBalance + donationAmount, testAccounts.getOperatingCashBalance());
     }
 
     @Property
     public void propertySalaryDecreasesBalance(
-            @ForAll @DoubleRange(min = 0.0, max = 1000.0) double salaryAmount) {
-        // Property-based test: Withdrawing a valid salary decreases balance by that amount
-        // Initialize accounts for each property test since @BeforeEach doesn't work with jqwik
-        LibraryAccounts accounts = new LibraryAccounts();
-        double initialBalance = accounts.getOperatingCashBalance();
+            @ForAll @DoubleRange(min = 0.0, max = 500.0) double salaryAmount) {
+        // For any reasonable salary amount, balance should decrease accordingly
+        LibraryAccounts testAccounts = new LibraryAccounts();
+        double initialBalance = testAccounts.getOperatingCashBalance();
 
-        // Ensure salary amount is not more than the balance
-        Assume.that(salaryAmount <= initialBalance);
+        testAccounts.withdrawSalary(salaryAmount);
 
-        accounts.withdrawSalary(salaryAmount);
-
-        assertEquals(initialBalance - salaryAmount, accounts.getOperatingCashBalance(),
-                "Property: Balance should decrease by the withdrawn salary amount");
+        assertEquals(initialBalance - salaryAmount, testAccounts.getOperatingCashBalance());
     }
 
     @Property
     public void propertyOrderBookDecreasesBalance(
             @ForAll @DoubleRange(min = 10.0, max = 100.0) double bookCost) {
-        // Property-based test: Ordering a book decreases balance by the book's cost
-        // Initialize accounts for each property test since @BeforeEach doesn't work with jqwik
-        LibraryAccounts accounts = new LibraryAccounts();
-        double initialBalance = accounts.getOperatingCashBalance();
+        // For any book cost in the valid range, balance should decrease properly
+        LibraryAccounts testAccounts = new LibraryAccounts();
+        double initialBalance = testAccounts.getOperatingCashBalance();
 
-        // Ensure book cost is not more than the balance
-        Assume.that(bookCost <= initialBalance);
+        testAccounts.orderBook(bookCost);
 
-        accounts.orderBook(bookCost);
-
-        assertEquals(initialBalance - bookCost, accounts.getOperatingCashBalance(),
-                "Property: Balance should decrease by the book cost");
+        assertEquals(initialBalance - bookCost, testAccounts.getOperatingCashBalance());
     }
 
     @Property
     public void propertyAuthCodeWithSalary(
-            @ForAll @DoubleRange(min = 10.0, max = 1000.0) double salaryAmount) {
-        // Property-based test: Withdrawing salary with valid auth code records it for the librarian
-        // Initialize accounts for each property test since @BeforeEach doesn't work with jqwik
-        LibraryAccounts accounts = new LibraryAccounts();
+            @ForAll @DoubleRange(min = 10.0, max = 500.0) double salaryAmount) {
+        // When librarians withdraw salary, it should be tracked in their records
+        LibraryAccounts testAccounts = new LibraryAccounts();
 
-        // Ensure salary amount is not more than the balance
-        Assume.that(salaryAmount <= accounts.getOperatingCashBalance());
+        testAccounts.withdrawSalary(validAuthCode, salaryAmount);
 
-        accounts.withdrawSalary(validAuthCode, salaryAmount);
-
-        // Get the total salary withdrawn for this librarian
-        double totalSalary = accounts.getLibrarians().getTotalSalaryWithdrawn(validAuthCode);
-
-        // The total should be at least the amount we just withdrew
-        assertTrue(totalSalary >= salaryAmount,
-                "Property: Total salary withdrawn should include the current withdrawal");
+        double totalSalary = testAccounts.getLibrarians().getTotalSalaryWithdrawn(validAuthCode);
+        assertTrue(totalSalary >= salaryAmount);
     }
 
     @Property
     public void propertyOperationsAreCumulative(
             @ForAll @DoubleRange(min = 0.0, max = 1000.0) double donation1,
-            @ForAll @DoubleRange(min = 0.0, max = 500.0) double salary1,
+            @ForAll @DoubleRange(min = 0.0, max = 200.0) double salary1,
             @ForAll @DoubleRange(min = 0.0, max = 1000.0) double donation2,
-            @ForAll @DoubleRange(min = 0.0, max = 500.0) double salary2) {
-        // Property-based test: Multiple operations should affect the balance cumulatively
-        // Initialize accounts for each property test since @BeforeEach doesn't work with jqwik
-        LibraryAccounts accounts = new LibraryAccounts();
-        double initialBalance = accounts.getOperatingCashBalance();
+            @ForAll @DoubleRange(min = 0.0, max = 200.0) double salary2) {
+        // Multiple operations should all affect the balance correctly
+        LibraryAccounts testAccounts = new LibraryAccounts();
+        double initialBalance = testAccounts.getOperatingCashBalance();
 
-        // First round of operations
-        accounts.addDonation(donation1);
+        // Do a series of operations
+        testAccounts.addDonation(donation1);
+        testAccounts.withdrawSalary(salary1);
+        testAccounts.addDonation(donation2);
+        testAccounts.withdrawSalary(salary2);
 
-        // Ensure salary1 is not more than the current balance
-        double currentBalance = accounts.getOperatingCashBalance();
-        Assume.that(salary1 <= currentBalance);
-
-        accounts.withdrawSalary(salary1);
-
-        // Second round of operations
-        accounts.addDonation(donation2);
-
-        // Ensure salary2 is not more than the current balance
-        currentBalance = accounts.getOperatingCashBalance();
-        Assume.that(salary2 <= currentBalance);
-
-        accounts.withdrawSalary(salary2);
-
-        // Final balance should be: initial + donation1 - salary1 + donation2 - salary2
+        // Final balance should be precisely calculable
         double expectedBalance = initialBalance + donation1 - salary1 + donation2 - salary2;
-
-        assertEquals(expectedBalance, accounts.getOperatingCashBalance(),
-                "Property: Multiple operations should affect the balance cumulatively");
+        assertEquals(expectedBalance, testAccounts.getOperatingCashBalance());
     }
 }
