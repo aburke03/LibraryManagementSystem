@@ -27,6 +27,7 @@ public class InterfaceTest {
     // SPECIFICATION-BASED & STRUCTURAL TESTS
 
     @Test
+    // Startup banner shows once and exit option quits without errors
     public void testStartupBannerAndExit() {
         String input = "\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -34,6 +35,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Add a book then remove it in volunteer mode without errors
     public void testAddAndRemoveBook() {
         String input =
                 "\n" + // volunteer
@@ -45,6 +47,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Add member, attempt invalid checkout, then remove member without crashing
     public void testAddRemoveAndAttemptCheckoutWithMissingBook() {
         String input =
                 "\n" +
@@ -57,6 +60,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Non-integer menu input is treated as invalid and handled gracefully
     public void testNonIntegerMenuChoice() {
         String input = "\nabc\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -64,6 +68,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Checkout then return a valid book for a valid member without errors
     public void testCheckoutAndReturnValidBook() {
         String input =
                 "\n" +
@@ -77,6 +82,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Invalid member or book IDs in checkout do not crash the system
     public void testCheckoutInvalidIds() {
         String input = "\n5\nBADMEMBER\nBADBOOK\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -84,6 +90,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Invalid member or book IDs in return do not crash the system
     public void testReturnInvalidIds() {
         String input = "\n6\nX\nY\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -91,6 +98,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Viewing the list of books should display entries without errors
     public void testViewBooks() {
         String input = "\n1\nBook\nAuth\n2001\nisbn\nbk1\nMystery\n7\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -98,6 +106,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Viewing the list of members should display entries without errors
     public void testViewMembers() {
         String input = "\n3\nJane\njane@ex.com\nMID1\n8\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -105,6 +114,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Out-of-range menu choices print a warning and continue running
     public void testInvalidMenuChoice() {
         String input = "\n42\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -112,6 +122,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Return action with valid member but missing book does not throw
     public void testReturnWithValidMemberOnly() {
         String input =
                 "\n" +
@@ -123,6 +134,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Return action with valid book but missing member does not throw
     public void testReturnWithValidBookOnly() {
         String input =
                 "\n" +
@@ -134,6 +146,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Volunteers are not allowed to remove members, but system should not crash
     public void testRemoveMemberAsVolunteer() {
         String input = "\n4\nMEM1\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -141,6 +154,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Full-time librarians can remove members without errors
     public void testRemoveMemberAsFullTime() {
         String input = "123456\n4\nMID\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -148,6 +162,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Volunteers cannot add donations, but system continues without crashing
     public void testAddDonationAsVolunteer() {
         String input = "\n9\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -155,6 +170,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Full-time can add a valid donation without errors
     public void testAddDonationAsFullTimeValid() {
         String input = "123456\n9\n100\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -162,6 +178,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Non-numeric donation amounts are handled gracefully
     public void testAddDonationInvalidAmountNonNumeric() {
         String input = "123456\n9\nabc\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -169,6 +186,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Negative donation amounts are rejected without crashing
     public void testAddDonationNegativeAmount() {
         String input = "123456\n9\n-50\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -176,6 +194,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Volunteers are not allowed to withdraw salary, but system should not crash
     public void testWithdrawSalaryAsVolunteer() {
         String input = "\n10\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -183,6 +202,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Full-time can withdraw a valid salary amount without errors
     public void testWithdrawSalaryAsFullTimeValid() {
         String input = "123456\n10\n200\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -190,6 +210,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Non-numeric salary inputs are caught and handled
     public void testWithdrawSalaryInvalidNonNumeric() {
         String input = "123456\n10\nxyz\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -197,6 +218,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Negative salary withdrawals are rejected without crashing
     public void testWithdrawSalaryNegativeAmount() {
         String input = "123456\n10\n-100\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
@@ -204,6 +226,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Cancelled purchase flow during checkout should not crash
     public void testCheckoutPurchaseCancelled() {
         String input =
                 "123456\n" +
@@ -215,6 +238,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Successful purchase prompts for book details and completes checkout
     public void testCheckoutPurchaseSuccess() {
         String input =
                 "123456\n" +
@@ -227,6 +251,7 @@ public class InterfaceTest {
     }
 
     @Test
+    // Insufficient funds on salary withdrawal are caught and handled gracefully
     public void testWithdrawSalaryInsufficientFunds() {
         String input = "123456\n10\n50000\n11\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
