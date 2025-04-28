@@ -10,8 +10,14 @@ public class Library {
     private Map<String, Member> allMembers = new HashMap<>();
 
     //Adds a new book to the library.
-    public void addBook(Book book) {
+    //returns boolean based on add success
+    public boolean addBook(Book book) {
+        if (allBooks.containsKey(book.getBookId())) {
+            System.out.println("Book ID already exists!");
+            return false;
+        }
         allBooks.put(book.getBookId(), book);
+        return true;
     }
 
     //Removes a book from the library by its ID.
@@ -20,8 +26,14 @@ public class Library {
     }
 
     //Adds a new member to the library.
-    public void addMember(Member member) {
+    //returns boolean based on add success
+    public boolean addMember(Member member) {
+        if (allMembers.containsKey(member.getMemberId())) {
+            System.out.println("Member ID already exists!");
+            return false;
+        }
         allMembers.put(member.getMemberId(), member);
+        return true;
     }
 
     //Revokes a member's membership by their ID.

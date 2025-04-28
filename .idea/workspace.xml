@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fe825b21-bbf4-4abc-8ea1-92a6d5886d8f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/Interface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/InterfaceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/InterfaceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Library.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Library.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/LibraryManagementSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/LibraryManagementSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Interface.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Interface.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Library.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Library.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/LibraryManagementSystem.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/LibraryManagementSystem.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/LibraryTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/LibraryTest.class" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.LibraryManagementSystem.executor": "Run",
+    "JUnit.BookTest.executor": "Coverage",
+    "JUnit.InterfaceTest.executor": "Coverage",
+    "JUnit.LibrariansTest.executor": "Coverage",
+    "JUnit.LibraryAccountsTest.executor": "Coverage",
+    "JUnit.LibraryTest.executor": "Coverage",
+    "JUnit.MemberTest.executor": "Coverage",
+    "git-widget-placeholder": "master",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="LAST_COMMIT_MESSAGE" value="" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$MemberTest.ic" NAME="MemberTest Coverage Results" MODIFIED="1745803591917" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$BookTest.ic" NAME="BookTest Coverage Results" MODIFIED="1745803585971" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$InterfaceTest.ic" NAME="InterfaceTest Coverage Results" MODIFIED="1745813891446" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$LibraryTest.ic" NAME="LibraryTest Coverage Results" MODIFIED="1745803561238" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$LibrariansTest.ic" NAME="LibrariansTest Coverage Results" MODIFIED="1745803574446" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/LibraryManagementSystem$LibraryAccountsTest.ic" NAME="LibraryAccountsTest Coverage Results" MODIFIED="1745803518374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+  </component>
+</project>

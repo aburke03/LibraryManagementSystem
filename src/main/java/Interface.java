@@ -31,7 +31,7 @@ public class Interface {
             System.out.println("2. Remove Book");
             System.out.println("3. Add Member");
             System.out.println("4. Remove Member");
-            System.out.println("5. Checkout Book");
+            System.out.println("5. Checkout/Purchase Book");
             System.out.println("6. Return Book");
             System.out.println("7. View All Books");
             System.out.println("8. View All Members");
@@ -73,7 +73,7 @@ public class Interface {
 
     private void authenticateUser() {
         // Prompt for and validate fulltime librarian code
-        System.out.print("Enter Full‑Time Librarian Code (or press Enter for Part-Time / Volunteer): ");
+        System.out.print("Enter Full‑Time Librarian Code (or press Enter to access as a Volunteer Librarian): ");
         String code = scanner.nextLine().trim();
         if (!code.isEmpty() && accounts.getLibrarians().authenticate(code)) {
             isFullTime = true;
@@ -112,8 +112,7 @@ public class Interface {
     private void addBook() {
         // Add a new book to the library
         Book book = promptBookDetails();
-        library.addBook(book);
-        System.out.println("Added book: " + book.getBookInfo());
+        if (library.addBook(book)) System.out.println("Added book: " + book.getBookInfo());
     }
 
     private void removeBook() {
@@ -133,8 +132,7 @@ public class Interface {
         System.out.print("Enter member ID: ");
         String id = scanner.nextLine();
         Member member = new Member(name, email, id);
-        library.addMember(member);
-        System.out.println("Added member: " + member.getMemberInfo());
+        if (library.addMember(member)) System.out.println("Added member: " + member.getMemberInfo());
     }
 
     private void removeMember() {
@@ -215,6 +213,7 @@ public class Interface {
         for (Book book : library.getAllBooks()) {
             System.out.println(book.getBookInfo());
         }
+        if (library.getAllBooks().isEmpty()) System.out.println("No books currently in System!");
     }
 
     private void viewMembers() {
@@ -222,6 +221,7 @@ public class Interface {
         for (Member member : library.getAllMembers()) {
             System.out.println(member.getMemberInfo());
         }
+        if (library.getAllMembers().isEmpty()) System.out.println("No members currently in System!");
     }
 
     private void addDonation() {
