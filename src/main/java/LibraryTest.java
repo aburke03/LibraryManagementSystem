@@ -46,11 +46,28 @@ public class LibraryTest {
     }
 
     @Test
+    public void testNoDuplicateID() {
+        // Remove the book and verify it cannot be retrieved.
+        testBook = new Book("Definitely Not The Hobbit", "J.R.R. Tolkien", 1937, "978-0547928227", "B001", "Fantasy");
+
+        assertEquals(library.addBook(testBook), false);
+    }
+
+
+    @Test
     public void testRemoveBook() {
         // Remove the book and verify it cannot be retrieved.
         library.removeBook("B001");
         assertNull(library.getBookById("B001"), "Removed book should not be retrievable.");
     }
+        @Test
+    public void testNoDuplicateID() {
+        // Remove the book and verify it cannot be retrieved.
+        testBook = new Book("Definitely Not The Hobbit", "J.R.R. Tolkien", 1937, "978-0547928227", "B001", "Fantasy");
+
+        assertEquals(library.addBook(testBook), false);
+    }
+
 
     @Test
     public void testAddAndRevokeMember() {
